@@ -4,7 +4,14 @@ from typing import Any
 import pandas as pd
 from fastapi import FastAPI, File, HTTPException, UploadFile, status
 
-from backend.matcher import match_exact_references
+from backend.evaluator import (
+    ReconciliationEvaluationError,
+    evaluate_reconciliation,
+)
+from backend.matcher import (
+    match_exact_references,
+    match_with_fallbacks,
+)
 from backend.validators import CSVValidationError, validate_csv
 
 
@@ -12,9 +19,9 @@ app = FastAPI(
     title="LedgerLens AI API",
     description=(
         "Backend API for validating financial data, matching invoices, "
-        "payments and bank transactions, and supporting human review."
+        "payments and bank transactions, and evaluating reconciliation quality."
     ),
-    version="0.3.0",
+    version="0.5.0",
 )
 
 
@@ -23,7 +30,7 @@ async def _read_validated_csv(
     dataset_type: str,
 ) -> tuple[pd.DataFrame, dict[str, Any]]:
     """
-    Read, validate and convert an uploaded CSV file into a DataFrame.
+    Read, validate and convert an uploaded LedgerLens CSV file.
     """
 
     if not file.filename:
@@ -62,13 +69,67 @@ async def _read_validated_csv(
     }
 
 
+async def _read_expected_matches_csv(
+    file: UploadFile,
+) -> pd.DataFrame:
+    """
+    Read the labelled expected-matches CSV used for evaluation.
+    """
+
+    if not file.filename:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The expected-matches file must have a filename.",
+        )
+
+    if not file.filename.lower().endswith(".csv"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The expected-matches file must be a CSV file.",
+        )
+
+    content = await file.read()
+
+    if not content or not content.strip():
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="The expected-matches CSV file is empty.",
+        )
+
+    try:
+        dataframe = pd.read_csv(
+            BytesIO(content),
+            dtype=str,
+        )
+    except UnicodeDecodeError as error:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=(
+                "The expected-matches file could not be decoded. "
+                "Upload a UTF-8 CSV file."
+            ),
+        ) from error
+    except pd.errors.EmptyDataError as error:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="The expected-matches file contains no readable data.",
+        ) from error
+    except pd.errors.ParserError as error:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="The expected-matches CSV structure is invalid.",
+        ) from error
+
+    return dataframe
+
+
 @app.get("/", tags=["System"])
 async def root() -> dict[str, str]:
     """Return basic information about the LedgerLens AI API."""
 
     return {
         "service": "LedgerLens AI API",
-        "version": "0.3.0",
+        "version": "0.5.0",
         "status": "running",
         "documentation": "/docs",
     }
@@ -126,9 +187,7 @@ async def reconcile_exact_references(
     ),
 ) -> dict[str, Any]:
     """
-    Reconcile invoices, payments and bank transactions using exact references.
-
-    All three datasets are validated before matching begins.
+    Reconcile records using exact references.
     """
 
     try:
@@ -166,3 +225,156 @@ async def reconcile_exact_references(
         await invoices_file.close()
         await payments_file.close()
         await bank_transactions_file.close()
+
+
+@app.post("/reconcile/fallback", tags=["Reconciliation"])
+async def reconcile_with_fallback_rules(
+    invoices_file: UploadFile = File(
+        ...,
+        description="Invoice CSV dataset.",
+    ),
+    payments_file: UploadFile = File(
+        ...,
+        description="Payment CSV dataset.",
+    ),
+    bank_transactions_file: UploadFile = File(
+        ...,
+        description="Bank transaction CSV dataset.",
+    ),
+) -> dict[str, Any]:
+    """
+    Run exact-reference matching followed by fallback matching.
+    """
+
+    try:
+        invoices, invoices_validation = await _read_validated_csv(
+            file=invoices_file,
+            dataset_type="invoices",
+        )
+
+        payments, payments_validation = await _read_validated_csv(
+            file=payments_file,
+            dataset_type="payments",
+        )
+
+        bank_transactions, bank_validation = await _read_validated_csv(
+            file=bank_transactions_file,
+            dataset_type="bank_transactions",
+        )
+
+        matching_result = match_with_fallbacks(
+            invoices=invoices,
+            payments=payments,
+            bank_transactions=bank_transactions,
+        )
+
+        return {
+            "reconciliation_type": (
+                "deterministic_exact_reference_with_fallbacks"
+            ),
+            "source_validation": {
+                "invoices": invoices_validation,
+                "payments": payments_validation,
+                "bank_transactions": bank_validation,
+            },
+            **matching_result,
+        }
+    finally:
+        await invoices_file.close()
+        await payments_file.close()
+        await bank_transactions_file.close()
+
+
+@app.post("/evaluate/fallback", tags=["Evaluation"])
+async def evaluate_fallback_reconciliation(
+    invoices_file: UploadFile = File(
+        ...,
+        description="Invoice CSV dataset.",
+    ),
+    payments_file: UploadFile = File(
+        ...,
+        description="Payment CSV dataset.",
+    ),
+    bank_transactions_file: UploadFile = File(
+        ...,
+        description="Bank transaction CSV dataset.",
+    ),
+    expected_matches_file: UploadFile = File(
+        ...,
+        description="Labelled expected reconciliation results.",
+    ),
+) -> dict[str, Any]:
+    """
+    Run fallback reconciliation and compare it with labelled ground truth.
+
+    The evaluation calculates:
+
+    - Status accuracy
+    - Complete-case accuracy
+    - Link precision
+    - Link recall
+    - Link F1 score
+    - Confirmed-match precision
+    - Manual-review rate
+    - Automatic-confirmation rate
+    """
+
+    try:
+        invoices, invoices_validation = await _read_validated_csv(
+            file=invoices_file,
+            dataset_type="invoices",
+        )
+
+        payments, payments_validation = await _read_validated_csv(
+            file=payments_file,
+            dataset_type="payments",
+        )
+
+        bank_transactions, bank_validation = await _read_validated_csv(
+            file=bank_transactions_file,
+            dataset_type="bank_transactions",
+        )
+
+        expected_matches = await _read_expected_matches_csv(
+            expected_matches_file
+        )
+
+        matching_result = match_with_fallbacks(
+            invoices=invoices,
+            payments=payments,
+            bank_transactions=bank_transactions,
+        )
+
+        try:
+            evaluation_result = evaluate_reconciliation(
+                matching_result=matching_result,
+                expected_matches=expected_matches,
+            )
+        except ReconciliationEvaluationError as error:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail=str(error),
+            ) from error
+
+        return {
+            "evaluation_type": (
+                "deterministic_fallback_reconciliation_evaluation"
+            ),
+            "source_validation": {
+                "invoices": invoices_validation,
+                "payments": payments_validation,
+                "bank_transactions": bank_validation,
+                "expected_matches": {
+                    "filename": expected_matches_file.filename,
+                    "row_count": int(len(expected_matches)),
+                    "columns": list(expected_matches.columns),
+                },
+            },
+            "reconciliation": matching_result,
+            "evaluation": evaluation_result,
+        }
+    finally:
+        await invoices_file.close()
+        await payments_file.close()
+        await bank_transactions_file.close()
+        await expected_matches_file.close()
