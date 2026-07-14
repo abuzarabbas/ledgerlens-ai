@@ -8,6 +8,8 @@ AMOUNT_TOLERANCE_PERCENT = 0.01
 MINIMUM_AMOUNT_TOLERANCE = 20.00
 MAXIMUM_DATE_DISTANCE_DAYS = 45
 FALLBACK_REVIEW_THRESHOLD = 85
+FALLBACK_MAX_CONFIDENCE = 95
+FALLBACK_MAX_CONFIDENCE_WITH_CONFLICT = 90
 
 
 def _normalise_text(value: Any) -> str:
@@ -102,6 +104,29 @@ def _prepare_dataframe(dataframe: pd.DataFrame) -> pd.DataFrame:
     ]
 
     return prepared
+
+
+def _calculate_status_counts(
+    results: list[dict[str, Any]],
+) -> dict[str, int]:
+    """
+    Count each reconciliation status.
+    """
+
+    supported_statuses = [
+        "confirmed",
+        "review",
+        "duplicate_review",
+        "unmatched",
+    ]
+
+    return {
+        reconciliation_status: sum(
+            result["status"] == reconciliation_status
+            for result in results
+        )
+        for reconciliation_status in supported_statuses
+    }
 
 
 def match_exact_references(
@@ -400,7 +425,7 @@ def _score_fallback_pair(
     )
 
     currencies_match = (
-        invoice_currency
+        bool(invoice_currency)
         and invoice_currency
         == payment_currency
         == transaction_currency
@@ -535,7 +560,18 @@ def _score_fallback_pair(
         "payment_and_bank_amount_consistent"
     )
 
-    confidence_score = min(int(score), 100)
+    raw_confidence_score = min(int(score), 100)
+
+    if conflicts:
+        confidence_score = min(
+            raw_confidence_score,
+            FALLBACK_MAX_CONFIDENCE_WITH_CONFLICT,
+        )
+    else:
+        confidence_score = min(
+            raw_confidence_score,
+            FALLBACK_MAX_CONFIDENCE,
+        )
 
     return {
         "confidence_score": confidence_score,
@@ -745,27 +781,4 @@ def match_with_fallbacks(
             final_results
         ),
         "results": final_results,
-    }
-
-
-def _calculate_status_counts(
-    results: list[dict[str, Any]],
-) -> dict[str, int]:
-    """
-    Count each reconciliation status.
-    """
-
-    supported_statuses = [
-        "confirmed",
-        "review",
-        "duplicate_review",
-        "unmatched",
-    ]
-
-    return {
-        reconciliation_status: sum(
-            result["status"] == reconciliation_status
-            for result in results
-        )
-        for reconciliation_status in supported_statuses
     }
