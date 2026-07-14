@@ -1,0 +1,13 @@
+transaction_id,booking_date,value_date,currency,transaction_amount,sender_name,bank_reference,description
+TXN-9001,2026-01-28,2026-01-28,EUR,2450.00,Alpine Logistics GmbH,ALP-2026-1001,Transfer for invoice 1001
+TXN-9002,2026-02-02,2026-02-02,EUR,1785.50,Nordstern Retail,NOR-2026-1002,Invoice settlement
+TXN-9003,2026-02-05,2026-02-05,EUR,3185.00,Bavaria Fleet Services,,Payment after bank charges
+TXN-9004,2026-02-08,2026-02-08,EUR,875.25,Rheinland Components AG,,Customer transfer
+TXN-9005,2026-02-10,2026-02-10,EUR,2500.00,Elbe Transport Solutions,ELB-2026-1005,Partial invoice payment
+TXN-9006,2026-02-12,2026-02-12,EUR,1250.00,MainTech Systems GmbH,MTS-2026-1006,Invoice payment
+TXN-9007,2026-02-12,2026-02-12,EUR,1250.00,MainTech Systems GmbH,MTS-2026-1006,Duplicate transfer
+TXN-9008,2026-03-01,2026-03-01,EUR,2250.75,Danube Commercial Services,DCS-2026-1007,Delayed settlement
+TXN-9009,2026-02-17,2026-02-17,EUR,980.00,Hanseatic Supply,,Payment received
+TXN-9010,2026-02-19,2026-02-19,USD,3675.40,Black Forest Mobility,BFM-2026-1009,International payment
+TXN-9011,2026-02-22,2026-02-22,EUR,1420.00,Isar Digital Solutions,IDS-2026-1010,Invoice settlement
+TXN-9012,2026-02-24,2026-02-24,EUR,640.00,Unknown Sender,,Unidentified bank transfer
