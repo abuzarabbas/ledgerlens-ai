@@ -1,0 +1,12 @@
+payment_id,customer_id,payment_date,currency,payment_amount,payment_reference,payment_description
+PAY-5001,CUST-001,2026-01-28,EUR,2450.00,ALP-2026-1001,Payment for Alpine Logistics invoice 1001
+PAY-5002,CUST-002,2026-02-02,EUR,1785.50,NOR-2026-1002,Nordstern invoice settlement
+PAY-5003,CUST-003,2026-02-05,EUR,3185.00,,Bavaria Fleet payment less bank fee
+PAY-5004,CUST-004,2026-02-08,EUR,875.25,,Rheinland Components payment
+PAY-5005,CUST-005,2026-02-10,EUR,2500.00,ELB-2026-1005,Partial payment for Elbe Transport invoice
+PAY-5006,CUST-006,2026-02-12,EUR,1250.00,MTS-2026-1006,MainTech invoice payment
+PAY-5007,CUST-006,2026-02-12,EUR,1250.00,MTS-2026-1006,Possible duplicate MainTech payment
+PAY-5008,CUST-007,2026-03-01,EUR,2250.75,DCS-2026-1007,Delayed payment for Danube Commercial Services
+PAY-5009,CUST-008,2026-02-17,EUR,980.00,,Hanseatic Supply settlement
+PAY-5010,CUST-009,2026-02-19,USD,3675.40,BFM-2026-1009,Black Forest Mobility payment in incorrect currency
+PAY-5011,,2026-02-22,EUR,1420.00,IDS-2026-1010,Isar Digital Solutions invoice settlement
