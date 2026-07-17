@@ -2,21 +2,29 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0"
     >
+
     <meta
         name="description"
         content="LedgerLens AI financial reconciliation dashboard."
     >
+
     <title>LedgerLens AI</title>
-    <link rel="stylesheet" href="./styles.css">
+
+   <link rel="stylesheet" href="./styles.css?v=2">
 </head>
 
 <body>
     <header class="topbar">
-        <a class="brand" href="/dashboard/" aria-label="LedgerLens home">
+        <a
+            class="brand"
+            href="/dashboard/"
+            aria-label="LedgerLens home"
+        >
             <span class="brand-mark" aria-hidden="true">L</span>
 
             <span>
@@ -31,15 +39,23 @@
             role="status"
             aria-live="polite"
         >
-            <span class="status-dot" aria-hidden="true"></span>
-            <span id="api-status-text">Checking API</span>
+            <span
+                class="status-dot"
+                aria-hidden="true"
+            ></span>
+
+            <span id="api-status-text">
+                Checking API
+            </span>
         </div>
     </header>
 
     <main class="page">
         <section class="hero">
             <div class="hero-copy">
-                <p class="eyebrow">FINANCIAL OPERATIONS</p>
+                <p class="eyebrow">
+                    FINANCIAL OPERATIONS
+                </p>
 
                 <h1>
                     Reconcile invoices, payments and bank transactions.
@@ -72,57 +88,373 @@
             </div>
 
             <aside class="principles-card">
-                <p class="card-label">CONTROL MODEL</p>
+                <p class="card-label">
+                    CONTROL MODEL
+                </p>
 
-                <h2>AI assists. People approve.</h2>
+                <h2>
+                    AI assists. People approve.
+                </h2>
 
                 <ul>
-                    <li>Exact matches remain deterministic</li>
-                    <li>Uncertain cases receive structured review</li>
-                    <li>AI confidence never exceeds 95</li>
-                    <li>Every AI recommendation requires human review</li>
+                    <li>
+                        Exact matches remain deterministic
+                    </li>
+
+                    <li>
+                        Uncertain cases receive structured review
+                    </li>
+
+                    <li>
+                        AI confidence never exceeds 95
+                    </li>
+
+                    <li>
+                        Every AI recommendation requires human review
+                    </li>
                 </ul>
             </aside>
         </section>
 
-        <section class="workspace" aria-labelledby="workspace-heading">
+        <section
+            class="workspace"
+            aria-labelledby="workspace-heading"
+        >
             <div class="section-heading">
                 <div>
-                    <p class="eyebrow">WORKSPACE</p>
-                    <h2 id="workspace-heading">New reconciliation</h2>
+                    <p class="eyebrow">
+                        WORKSPACE
+                    </p>
+
+                    <h2 id="workspace-heading">
+                        New reconciliation
+                    </h2>
                 </div>
 
-                <span class="phase-badge">Foundation connected</span>
+                <span class="phase-badge">
+                    Upload workflow active
+                </span>
             </div>
 
-            <div class="placeholder-grid">
-                <article class="placeholder-card">
-                    <span class="step-number">01</span>
-                    <h3>Upload datasets</h3>
-                    <p>
-                        Invoice, payment and bank transaction uploads will
-                        be added in the next phase.
+            <form
+                id="reconciliation-form"
+                class="reconciliation-form"
+                novalidate
+            >
+                <div class="upload-grid">
+                    <section class="upload-card">
+                        <div class="upload-card-heading">
+                            <span class="step-number">
+                                01
+                            </span>
+
+                            <span class="required-label">
+                                Required
+                            </span>
+                        </div>
+
+                        <h3>
+                            Invoice dataset
+                        </h3>
+
+                        <p>
+                            Upload the invoice records that need
+                            reconciliation.
+                        </p>
+
+                        <input
+    id="invoices-file"
+    class="native-file-input"
+    name="invoices_file"
+    type="file"
+    accept=".csv,text/csv"
+    required
+>
+
+                        <div
+                            id="invoices-file-status"
+                            class="file-status"
+                            role="status"
+                        >
+                            No file selected
+                        </div>
+                    </section>
+
+                    <section class="upload-card">
+                        <div class="upload-card-heading">
+                            <span class="step-number">
+                                02
+                            </span>
+
+                            <span class="required-label">
+                                Required
+                            </span>
+                        </div>
+
+                        <h3>
+                            Payment dataset
+                        </h3>
+
+                        <p>
+                            Upload the payment records received from
+                            customers.
+                        </p>
+
+                        <input
+    id="payments-file"
+    class="native-file-input"
+    name="payments_file"
+    type="file"
+    accept=".csv,text/csv"
+    required
+>
+
+                        <div
+                            id="payments-file-status"
+                            class="file-status"
+                            role="status"
+                        >
+                            No file selected
+                        </div>
+                    </section>
+
+                    <section class="upload-card">
+                        <div class="upload-card-heading">
+                            <span class="step-number">
+                                03
+                            </span>
+
+                            <span class="required-label">
+                                Required
+                            </span>
+                        </div>
+
+                        <h3>
+                            Bank transactions
+                        </h3>
+
+                        <p>
+                            Upload the bank transaction export used for
+                            matching.
+                        </p>
+
+                        <input
+    id="bank-transactions-file"
+    class="native-file-input"
+    name="bank_transactions_file"
+    type="file"
+    accept=".csv,text/csv"
+    required
+>
+
+                        <div
+                            id="bank-transactions-file-status"
+                            class="file-status"
+                            role="status"
+                        >
+                            No file selected
+                        </div>
+                    </section>
+                </div>
+
+                <section class="provider-panel">
+                    <div>
+                        <p class="eyebrow">
+                            ANALYSIS PROVIDER
+                        </p>
+
+                        <h3>
+                            Choose the AI review mode
+                        </h3>
+
+                        <p class="provider-description">
+                            Deterministic reconciliation runs first in both
+                            modes. Only uncertain cases are sent for AI
+                            review.
+                        </p>
+                    </div>
+
+                    <div class="provider-field">
+                        <label for="provider-select">
+                            Provider
+                        </label>
+
+                        <select
+                            id="provider-select"
+                            name="provider"
+                        >
+                            <option value="mock">
+                                Mock AI — deterministic demo
+                            </option>
+
+                            <option value="groq">
+                                Groq — live AI analysis
+                            </option>
+                        </select>
+
+                        <small id="provider-help">
+                            Mock mode requires no API key and produces
+                            repeatable decisions.
+                        </small>
+                    </div>
+                </section>
+
+                <div class="form-actions">
+                    <button
+                        id="run-reconciliation-button"
+                        class="button button-primary button-large"
+                        type="submit"
+                        disabled
+                    >
+                        Run reconciliation
+                    </button>
+
+                    <button
+                        id="reset-form-button"
+                        class="button button-secondary"
+                        type="button"
+                    >
+                        Clear files
+                    </button>
+                </div>
+
+                <div
+                    id="run-status"
+                    class="run-status"
+                    role="status"
+                    aria-live="polite"
+                >
+                    Select all three CSV files to continue.
+                </div>
+            </form>
+        </section>
+
+        <section
+            id="results-panel"
+            class="results-panel"
+            aria-labelledby="results-heading"
+            hidden
+        >
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">
+                        RECONCILIATION OUTPUT
                     </p>
+
+                    <h2 id="results-heading">
+                        Results
+                    </h2>
+                </div>
+
+                <span
+                    id="result-provider-badge"
+                    class="phase-badge"
+                >
+                    Provider
+                </span>
+            </div>
+
+            <div class="summary-grid">
+                <article class="summary-card">
+                    <span class="summary-label">
+                        Total invoices
+                    </span>
+
+                    <strong id="summary-total">
+                        0
+                    </strong>
                 </article>
 
-                <article class="placeholder-card">
-                    <span class="step-number">02</span>
-                    <h3>Run reconciliation</h3>
-                    <p>
-                        Exact-reference rules will run before fallback
-                        matching and AI review.
-                    </p>
+                <article class="summary-card summary-confirmed">
+                    <span class="summary-label">
+                        Confirmed
+                    </span>
+
+                    <strong id="summary-confirmed">
+                        0
+                    </strong>
                 </article>
 
-                <article class="placeholder-card">
-                    <span class="step-number">03</span>
-                    <h3>Review decisions</h3>
-                    <p>
-                        Results, confidence, conflicts and AI explanations
-                        will appear in a finance-focused review table.
-                    </p>
+                <article class="summary-card summary-review">
+                    <span class="summary-label">
+                        Review
+                    </span>
+
+                    <strong id="summary-review">
+                        0
+                    </strong>
+                </article>
+
+                <article class="summary-card summary-duplicate">
+                    <span class="summary-label">
+                        Duplicate review
+                    </span>
+
+                    <strong id="summary-duplicate">
+                        0
+                    </strong>
+                </article>
+
+                <article class="summary-card summary-unmatched">
+                    <span class="summary-label">
+                        Unmatched
+                    </span>
+
+                    <strong id="summary-unmatched">
+                        0
+                    </strong>
+                </article>
+
+                <article class="summary-card summary-ai">
+                    <span class="summary-label">
+                        AI candidates
+                    </span>
+
+                    <strong id="summary-ai-candidates">
+                        0
+                    </strong>
                 </article>
             </div>
+
+            <div class="result-information">
+                <div>
+                    <span class="result-information-label">
+                        Analysis mode
+                    </span>
+
+                    <strong id="result-analysis-mode">
+                        —
+                    </strong>
+                </div>
+
+                <div>
+                    <span class="result-information-label">
+                        Model
+                    </span>
+
+                    <strong id="result-model-name">
+                        —
+                    </strong>
+                </div>
+
+                <div>
+                    <span class="result-information-label">
+                        Human review
+                    </span>
+
+                    <strong>
+                        Required for all AI recommendations
+                    </strong>
+                </div>
+            </div>
+
+            <details class="raw-details">
+                <summary>
+                    View raw API response
+                </summary>
+
+                <pre id="raw-response"></pre>
+            </details>
         </section>
 
         <section
@@ -131,21 +463,34 @@
             aria-labelledby="connection-heading"
         >
             <div>
-                <p class="eyebrow">SYSTEM STATUS</p>
-                <h2 id="connection-heading">Backend connection</h2>
+                <p class="eyebrow">
+                    SYSTEM STATUS
+                </p>
+
+                <h2 id="connection-heading">
+                    Backend connection
+                </h2>
             </div>
 
-            <div id="connection-result" class="connection-result">
+            <div
+                id="connection-result"
+                class="connection-result"
+            >
                 Waiting for the health check.
             </div>
         </section>
     </main>
 
     <footer class="footer">
-        <span>LedgerLens AI</span>
-        <span>Human-controlled financial reconciliation</span>
+        <span>
+            LedgerLens AI
+        </span>
+
+        <span>
+            Human-controlled financial reconciliation
+        </span>
     </footer>
 
-    <script src="./app.js"></script>
+<script src="./app.js?v=4"></script>
 </body>
 </html>
