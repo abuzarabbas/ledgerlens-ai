@@ -3,6 +3,7 @@ from typing import Any
 
 import pandas as pd
 from fastapi import FastAPI, File, HTTPException, UploadFile, status
+from starlette.concurrency import run_in_threadpool
 
 from backend.ai_service import (
     MockAIAnalyzer,
@@ -12,11 +13,10 @@ from backend.evaluator import (
     ReconciliationEvaluationError,
     evaluate_reconciliation,
 )
-from backend.matcher import (
-    match_exact_references,
-    match_with_fallbacks,
+from backend.groq_analyzer import (
+    GroqAnalysisError,
+    GroqAnalyzer,
 )
-from backend.validators import CSVValidationError, validate_csv
 from backend.matcher import (
     match_exact_references,
     match_with_fallbacks,
@@ -30,7 +30,7 @@ app = FastAPI(
         "Backend API for validating financial data, matching invoices, "
         "payments and bank transactions, and evaluating reconciliation quality."
     ),
-    version="0.6.0",
+    version="0.7.0",
 )
 
 
@@ -138,7 +138,7 @@ async def root() -> dict[str, str]:
 
     return {
         "service": "LedgerLens AI API",
-        "version": "0.6.0",
+        "version": "0.7.0",
         "status": "running",
         "documentation": "/docs",
     }
@@ -388,6 +388,7 @@ async def evaluate_fallback_reconciliation(
         await bank_transactions_file.close()
         await expected_matches_file.close()
 @app.post("/analyze/mock", tags=["AI Review"])
+@app.post("/analyze/mock", tags=["AI Review"])
 async def analyze_with_mock_ai(
     invoices_file: UploadFile = File(
         ...,
@@ -470,4 +471,104 @@ async def analyze_with_mock_ai(
     finally:
         await invoices_file.close()
         await payments_file.close()
-        await bank_transactions_file.close()        
+        await bank_transactions_file.close()
+
+
+@app.post("/analyze/groq", tags=["AI Review"])
+async def analyze_with_groq(
+    invoices_file: UploadFile = File(
+        ...,
+        description="Invoice CSV dataset.",
+    ),
+    payments_file: UploadFile = File(
+        ...,
+        description="Payment CSV dataset.",
+    ),
+    bank_transactions_file: UploadFile = File(
+        ...,
+        description="Bank transaction CSV dataset.",
+    ),
+) -> dict[str, Any]:
+    """
+    Run deterministic reconciliation followed by live Groq analysis.
+
+    Only uncertain records are sent to Groq:
+
+    - review
+    - duplicate_review
+    - unmatched
+
+    Deterministically confirmed records are excluded.
+    Every Groq recommendation requires human review.
+    """
+
+    try:
+        invoices, invoices_validation = await _read_validated_csv(
+            file=invoices_file,
+            dataset_type="invoices",
+        )
+
+        payments, payments_validation = await _read_validated_csv(
+            file=payments_file,
+            dataset_type="payments",
+        )
+
+        bank_transactions, bank_validation = await _read_validated_csv(
+            file=bank_transactions_file,
+            dataset_type="bank_transactions",
+        )
+
+        matching_result = match_with_fallbacks(
+            invoices=invoices,
+            payments=payments,
+            bank_transactions=bank_transactions,
+        )
+
+        try:
+            analyzer = GroqAnalyzer()
+        except ValueError as error:
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "error_code": "groq_not_configured",
+                    "message": str(error),
+                },
+            ) from error
+
+        try:
+            ai_analysis = await run_in_threadpool(
+                analyze_reconciliation_candidates,
+                matching_result,
+                analyzer,
+            )
+        except GroqAnalysisError as error:
+            raise HTTPException(
+                status_code=502,
+                detail={
+                    "error_code": "groq_analysis_failed",
+                    "message": str(error),
+                },
+            ) from error
+
+        return {
+            "analysis_type": (
+                "live_groq_assisted_reconciliation_review"
+            ),
+            "source_validation": {
+                "invoices": invoices_validation,
+                "payments": payments_validation,
+                "bank_transactions": bank_validation,
+            },
+            "reconciliation": matching_result,
+            "ai_analysis": ai_analysis,
+            "safety_policy": {
+                "confirmed_records_sent_to_ai": False,
+                "ai_can_confirm_financial_matches": False,
+                "human_review_required": True,
+                "maximum_ai_confidence_score": 95,
+            },
+        }
+    finally:
+        await invoices_file.close()
+        await payments_file.close()
+        await bank_transactions_file.close()

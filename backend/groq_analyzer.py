@@ -15,8 +15,8 @@ from backend.ai_service import (
 SYSTEM_INSTRUCTIONS = """
 You are a financial reconciliation review assistant.
 
-You assess one reconciliation candidate that was produced by a
-deterministic matching engine.
+You assess one reconciliation candidate produced by a deterministic
+matching engine.
 
 Rules:
 
@@ -93,9 +93,7 @@ class GroqAnalyzer:
     """
     Production reconciliation analyser backed by Groq.
 
-    The analyser implements the same interface as MockAIAnalyzer so the
-    reconciliation workflow can switch providers without changing the
-    deterministic matching logic.
+    The analyser implements the same interface as MockAIAnalyzer.
     """
 
     provider = "groq"
@@ -112,8 +110,8 @@ class GroqAnalyzer:
         """
         Configure the Groq analyser.
 
-        A fake client may be injected during automated testing so tests
-        never make external API calls.
+        A fake client can be injected during automated tests so that
+        tests never make external API calls.
         """
 
         load_dotenv()
@@ -152,8 +150,8 @@ class GroqAnalyzer:
         """
         Analyse one uncertain reconciliation candidate.
 
-        Groq returns strict JSON-schema output, which is then validated
-        again using the application's Pydantic safety model.
+        Groq returns a strict JSON-schema response, which is then
+        validated again using the application's Pydantic model.
         """
 
         candidate_json = candidate.model_dump_json(
@@ -188,30 +186,66 @@ class GroqAnalyzer:
                         "schema": GROQ_DECISION_SCHEMA,
                     },
                 },
+                temperature=0,
             )
+
         except APIError as error:
+            status_code = getattr(
+                error,
+                "status_code",
+                "unknown",
+            )
+
+            request_id = getattr(
+                error,
+                "request_id",
+                "unavailable",
+            )
+
             raise GroqAnalysisError(
-                "The Groq reconciliation analysis failed."
+                "The Groq reconciliation analysis failed. "
+                f"Provider status: {status_code}. "
+                f"Provider message: {error}. "
+                f"Request ID: {request_id}."
             ) from error
 
-        if not response.choices:
+        choices = getattr(
+            response,
+            "choices",
+            None,
+        )
+
+        if not choices:
             raise GroqAnalysisError(
                 "Groq returned no completion choices."
             )
 
-        content = response.choices[0].message.content
+        message = getattr(
+            choices[0],
+            "message",
+            None,
+        )
 
-        if content is None or not content.strip():
+        content = getattr(
+            message,
+            "content",
+            None,
+        )
+
+        if content is None or not str(content).strip():
             raise GroqAnalysisError(
                 "Groq returned an empty reconciliation decision."
             )
 
         try:
-            raw_decision = json.loads(content)
+            raw_decision = json.loads(
+                str(content)
+            )
 
             return AIReconciliationDecision.model_validate(
                 raw_decision
             )
+
         except (
             json.JSONDecodeError,
             ValidationError,
