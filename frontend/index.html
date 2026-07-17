@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+    <meta
+        name="description"
+        content="LedgerLens AI financial reconciliation dashboard."
+    >
+    <title>LedgerLens AI</title>
+    <link rel="stylesheet" href="./styles.css">
+</head>
+
+<body>
+    <header class="topbar">
+        <a class="brand" href="/dashboard/" aria-label="LedgerLens home">
+            <span class="brand-mark" aria-hidden="true">L</span>
+
+            <span>
+                <strong>LedgerLens</strong>
+                <small>AI reconciliation workspace</small>
+            </span>
+        </a>
+
+        <div
+            id="api-status"
+            class="status status-checking"
+            role="status"
+            aria-live="polite"
+        >
+            <span class="status-dot" aria-hidden="true"></span>
+            <span id="api-status-text">Checking API</span>
+        </div>
+    </header>
+
+    <main class="page">
+        <section class="hero">
+            <div class="hero-copy">
+                <p class="eyebrow">FINANCIAL OPERATIONS</p>
+
+                <h1>
+                    Reconcile invoices, payments and bank transactions.
+                </h1>
+
+                <p class="hero-description">
+                    Deterministic matching handles clear records first.
+                    AI reviews uncertain cases while keeping final approval
+                    under human control.
+                </p>
+
+                <div class="hero-actions">
+                    <button
+                        id="check-connection-button"
+                        class="button button-primary"
+                        type="button"
+                    >
+                        Check backend connection
+                    </button>
+
+                    <a
+                        class="button button-secondary"
+                        href="/docs"
+                        target="_blank"
+                        rel="noreferrer"
+                    >
+                        Open API documentation
+                    </a>
+                </div>
+            </div>
+
+            <aside class="principles-card">
+                <p class="card-label">CONTROL MODEL</p>
+
+                <h2>AI assists. People approve.</h2>
+
+                <ul>
+                    <li>Exact matches remain deterministic</li>
+                    <li>Uncertain cases receive structured review</li>
+                    <li>AI confidence never exceeds 95</li>
+                    <li>Every AI recommendation requires human review</li>
+                </ul>
+            </aside>
+        </section>
+
+        <section class="workspace" aria-labelledby="workspace-heading">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">WORKSPACE</p>
+                    <h2 id="workspace-heading">New reconciliation</h2>
+                </div>
+
+                <span class="phase-badge">Foundation connected</span>
+            </div>
+
+            <div class="placeholder-grid">
+                <article class="placeholder-card">
+                    <span class="step-number">01</span>
+                    <h3>Upload datasets</h3>
+                    <p>
+                        Invoice, payment and bank transaction uploads will
+                        be added in the next phase.
+                    </p>
+                </article>
+
+                <article class="placeholder-card">
+                    <span class="step-number">02</span>
+                    <h3>Run reconciliation</h3>
+                    <p>
+                        Exact-reference rules will run before fallback
+                        matching and AI review.
+                    </p>
+                </article>
+
+                <article class="placeholder-card">
+                    <span class="step-number">03</span>
+                    <h3>Review decisions</h3>
+                    <p>
+                        Results, confidence, conflicts and AI explanations
+                        will appear in a finance-focused review table.
+                    </p>
+                </article>
+            </div>
+        </section>
+
+        <section
+            id="connection-panel"
+            class="connection-panel"
+            aria-labelledby="connection-heading"
+        >
+            <div>
+                <p class="eyebrow">SYSTEM STATUS</p>
+                <h2 id="connection-heading">Backend connection</h2>
+            </div>
+
+            <div id="connection-result" class="connection-result">
+                Waiting for the health check.
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <span>LedgerLens AI</span>
+        <span>Human-controlled financial reconciliation</span>
+    </footer>
+
+    <script src="./app.js"></script>
+</body>
+</html>

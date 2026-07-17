@@ -1,8 +1,10 @@
 from io import BytesIO
+from pathlib import Path
 from typing import Any
 
 import pandas as pd
 from fastapi import FastAPI, File, HTTPException, UploadFile, status
+from fastapi.staticfiles import StaticFiles
 from starlette.concurrency import run_in_threadpool
 
 from backend.ai_service import (
@@ -23,6 +25,9 @@ from backend.matcher import (
 )
 from backend.validators import CSVValidationError, validate_csv
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+FRONTEND_DIR = BASE_DIR / "frontend"
+
 
 app = FastAPI(
     title="LedgerLens AI API",
@@ -30,10 +35,17 @@ app = FastAPI(
         "Backend API for validating financial data, matching invoices, "
         "payments and bank transactions, and evaluating reconciliation quality."
     ),
-    version="0.7.0",
+    version="0.8.0",
 )
 
-
+app.mount(
+    "/dashboard",
+    StaticFiles(
+        directory=str(FRONTEND_DIR),
+        html=True,
+    ),
+    name="dashboard",
+)
 async def _read_validated_csv(
     file: UploadFile,
     dataset_type: str,
@@ -138,7 +150,7 @@ async def root() -> dict[str, str]:
 
     return {
         "service": "LedgerLens AI API",
-        "version": "0.7.0",
+        "version": "0.8.0",
         "status": "running",
         "documentation": "/docs",
     }
