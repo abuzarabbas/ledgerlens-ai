@@ -15,7 +15,7 @@
 
     <title>LedgerLens AI</title>
 
-   <link rel="stylesheet" href="./styles.css?v=2">
+   <link rel="stylesheet" href="./styles.css?v=3">
 </head>
 
 <body>
@@ -447,7 +447,273 @@
                     </strong>
                 </div>
             </div>
+<section
+    class="review-section"
+    aria-labelledby="review-table-heading"
+>
+    <div class="review-section-heading">
+        <div>
+            <p class="eyebrow">
+                RECORD REVIEW
+            </p>
 
+            <h3 id="review-table-heading">
+                Invoice-level reconciliation
+            </h3>
+        </div>
+
+        <div class="review-controls">
+            <label for="status-filter">
+                Filter status
+            </label>
+
+            <select id="status-filter">
+                <option value="all">
+                    All records
+                </option>
+
+                <option value="confirmed">
+                    Confirmed
+                </option>
+
+                <option value="review">
+                    Review
+                </option>
+
+                <option value="duplicate_review">
+                    Duplicate review
+                </option>
+
+                <option value="unmatched">
+                    Unmatched
+                </option>
+            </select>
+        </div>
+    </div>
+
+    <div class="table-wrapper">
+        <table class="review-table">
+            <thead>
+                <tr>
+                    <th scope="col">
+                        Invoice
+                    </th>
+
+                    <th scope="col">
+                        Status
+                    </th>
+
+                    <th scope="col">
+                        Confidence
+                    </th>
+
+                    <th scope="col">
+                        Payment
+                    </th>
+
+                    <th scope="col">
+                        Bank transaction
+                    </th>
+
+                    <th scope="col">
+                        Match method
+                    </th>
+
+                    <th scope="col">
+                        AI recommendation
+                    </th>
+
+                    <th scope="col">
+                        Details
+                    </th>
+                </tr>
+            </thead>
+
+            <tbody id="review-table-body">
+                <tr>
+                    <td
+                        colspan="8"
+                        class="empty-table-message"
+                    >
+                        Run reconciliation to view invoice-level results.
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+<dialog
+    id="review-dialog"
+    class="review-dialog"
+    aria-labelledby="dialog-title"
+>
+    <div class="review-dialog-content">
+        <header class="review-dialog-header">
+            <div>
+                <p class="eyebrow">
+                    RECONCILIATION RECORD
+                </p>
+
+                <h2 id="dialog-title">
+                    Invoice details
+                </h2>
+            </div>
+
+            <button
+                id="review-dialog-close"
+                class="dialog-close-button"
+                type="button"
+                aria-label="Close invoice details"
+            >
+                ×
+            </button>
+        </header>
+
+        <div class="dialog-summary-grid">
+            <div>
+                <span class="dialog-label">
+                    Invoice
+                </span>
+
+                <strong id="detail-invoice-id">
+                    —
+                </strong>
+            </div>
+
+            <div>
+                <span class="dialog-label">
+                    Status
+                </span>
+
+                <strong id="detail-status">
+                    —
+                </strong>
+            </div>
+
+            <div>
+                <span class="dialog-label">
+                    Deterministic confidence
+                </span>
+
+                <strong id="detail-confidence">
+                    —
+                </strong>
+            </div>
+
+            <div>
+                <span class="dialog-label">
+                    Match method
+                </span>
+
+                <strong id="detail-method">
+                    —
+                </strong>
+            </div>
+        </div>
+
+        <section class="dialog-section">
+            <h3>
+                Matched records
+            </h3>
+
+            <dl class="dialog-definition-list">
+                <div>
+                    <dt>
+                        Payment IDs
+                    </dt>
+
+                    <dd id="detail-payments">
+                        —
+                    </dd>
+                </div>
+
+                <div>
+                    <dt>
+                        Bank transaction IDs
+                    </dt>
+
+                    <dd id="detail-transactions">
+                        —
+                    </dd>
+                </div>
+            </dl>
+        </section>
+
+        <section class="dialog-section">
+            <h3>
+                Deterministic assessment
+            </h3>
+
+            <p id="detail-deterministic-explanation">
+                —
+            </p>
+
+            <dl class="dialog-definition-list">
+                <div>
+                    <dt>
+                        Supporting signals
+                    </dt>
+
+                    <dd id="detail-supporting-signals">
+                        —
+                    </dd>
+                </div>
+
+                <div>
+                    <dt>
+                        Conflicts
+                    </dt>
+
+                    <dd id="detail-conflicts">
+                        —
+                    </dd>
+                </div>
+            </dl>
+        </section>
+
+        <section class="dialog-section dialog-ai-section">
+            <h3>
+                AI review
+            </h3>
+
+            <dl class="dialog-definition-list">
+                <div>
+                    <dt>
+                        Recommendation
+                    </dt>
+
+                    <dd id="detail-ai-recommendation">
+                        —
+                    </dd>
+                </div>
+
+                <div>
+                    <dt>
+                        AI confidence
+                    </dt>
+
+                    <dd id="detail-ai-confidence">
+                        —
+                    </dd>
+                </div>
+
+                <div>
+                    <dt>
+                        Human review
+                    </dt>
+
+                    <dd id="detail-human-review">
+                        —
+                    </dd>
+                </div>
+            </dl>
+
+            <p id="detail-ai-explanation">
+                —
+            </p>
+        </section>
+    </div>
+</dialog>
             <details class="raw-details">
                 <summary>
                     View raw API response
@@ -491,6 +757,6 @@
         </span>
     </footer>
 
-<script src="./app.js?v=4"></script>
+<script src="./app.js?v=5"></script>
 </body>
 </html>
