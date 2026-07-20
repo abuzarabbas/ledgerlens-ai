@@ -187,6 +187,8 @@ class GroqAnalyzer:
                     },
                 },
                 temperature=0,
+                max_completion_tokens=600,
+    reasoning_effort="low",
             )
 
         except APIError as error:

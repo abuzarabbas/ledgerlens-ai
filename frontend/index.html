@@ -15,7 +15,7 @@
 
     <title>LedgerLens AI</title>
 
-   <link rel="stylesheet" href="./styles.css?v=3">
+  <link rel="stylesheet" href="./styles.css?v=4">
 </head>
 
 <body>
@@ -328,7 +328,366 @@
                 </div>
             </form>
         </section>
+<section
+    id="import-mapping-section"
+    class="import-mapping-section"
+    aria-labelledby="import-mapping-heading"
+    hidden
+>
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">
+                REAL-DATA IMPORT
+            </p>
 
+            <h2 id="import-mapping-heading">
+                Review CSV column mappings
+            </h2>
+
+            <p>
+                LedgerLens checks each uploaded file and suggests how
+                its columns correspond to the required reconciliation
+                fields.
+            </p>
+        </div>
+    </div>
+
+    <div class="mapping-card-list">
+        <details
+            id="invoices-mapping-card"
+            class="mapping-card"
+            open
+        >
+            <summary>
+                <span>Invoices mapping</span>
+
+                <span
+                    id="invoices-mapping-summary-status"
+                    class="mapping-summary-status"
+                >
+                    Waiting for file
+                </span>
+            </summary>
+
+            <div class="mapping-card-content">
+                <div class="import-meta-grid">
+                    <div>
+                        <span>File</span>
+                        <strong id="invoices-preview-filename">—</strong>
+                    </div>
+
+                    <div>
+                        <span>Rows</span>
+                        <strong id="invoices-preview-rows">—</strong>
+                    </div>
+
+                    <div>
+                        <span>Columns</span>
+                        <strong id="invoices-preview-columns">—</strong>
+                    </div>
+
+                    <div>
+                        <span>Delimiter</span>
+                        <strong id="invoices-preview-delimiter">—</strong>
+                    </div>
+
+                    <div>
+                        <span>Encoding</span>
+                        <strong id="invoices-preview-encoding">—</strong>
+                    </div>
+                </div>
+
+                <div
+                    id="invoices-preview-warnings"
+                    class="import-warning-list"
+                    hidden
+                ></div>
+
+                <div
+                    id="invoices-mapping-status"
+                    class="mapping-readiness"
+                >
+                    Select an invoices CSV to generate suggestions.
+                </div>
+
+                <div class="mapping-table-wrapper">
+                    <table class="mapping-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">
+                                    LedgerLens field
+                                </th>
+
+                                <th scope="col">
+                                    Requirement
+                                </th>
+
+                                <th scope="col">
+                                    Source CSV column
+                                </th>
+
+                                <th scope="col">
+                                    Confidence
+                                </th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="invoices-mapping-body">
+                            <tr>
+                                <td
+                                    colspan="4"
+                                    class="empty-table-message"
+                                >
+                                    No invoices preview available.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3 class="preview-table-heading">
+                    Data preview
+                </h3>
+
+                <div class="preview-table-wrapper">
+                    <table class="data-preview-table">
+                        <thead id="invoices-preview-head"></thead>
+
+                        <tbody id="invoices-preview-body">
+                            <tr>
+                                <td class="empty-table-message">
+                                    No preview rows available.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </details>
+
+        <details
+            id="payments-mapping-card"
+            class="mapping-card"
+        >
+            <summary>
+                <span>Payments mapping</span>
+
+                <span
+                    id="payments-mapping-summary-status"
+                    class="mapping-summary-status"
+                >
+                    Waiting for file
+                </span>
+            </summary>
+
+            <div class="mapping-card-content">
+                <div class="import-meta-grid">
+                    <div>
+                        <span>File</span>
+                        <strong id="payments-preview-filename">—</strong>
+                    </div>
+
+                    <div>
+                        <span>Rows</span>
+                        <strong id="payments-preview-rows">—</strong>
+                    </div>
+
+                    <div>
+                        <span>Columns</span>
+                        <strong id="payments-preview-columns">—</strong>
+                    </div>
+
+                    <div>
+                        <span>Delimiter</span>
+                        <strong id="payments-preview-delimiter">—</strong>
+                    </div>
+
+                    <div>
+                        <span>Encoding</span>
+                        <strong id="payments-preview-encoding">—</strong>
+                    </div>
+                </div>
+
+                <div
+                    id="payments-preview-warnings"
+                    class="import-warning-list"
+                    hidden
+                ></div>
+
+                <div
+                    id="payments-mapping-status"
+                    class="mapping-readiness"
+                >
+                    Select a payments CSV to generate suggestions.
+                </div>
+
+                <div class="mapping-table-wrapper">
+                    <table class="mapping-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">
+                                    LedgerLens field
+                                </th>
+
+                                <th scope="col">
+                                    Requirement
+                                </th>
+
+                                <th scope="col">
+                                    Source CSV column
+                                </th>
+
+                                <th scope="col">
+                                    Confidence
+                                </th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="payments-mapping-body">
+                            <tr>
+                                <td
+                                    colspan="4"
+                                    class="empty-table-message"
+                                >
+                                    No payments preview available.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3 class="preview-table-heading">
+                    Data preview
+                </h3>
+
+                <div class="preview-table-wrapper">
+                    <table class="data-preview-table">
+                        <thead id="payments-preview-head"></thead>
+
+                        <tbody id="payments-preview-body">
+                            <tr>
+                                <td class="empty-table-message">
+                                    No preview rows available.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </details>
+
+        <details
+            id="bank-transactions-mapping-card"
+            class="mapping-card"
+        >
+            <summary>
+                <span>Bank transactions mapping</span>
+
+                <span
+                    id="bank-transactions-mapping-summary-status"
+                    class="mapping-summary-status"
+                >
+                    Waiting for file
+                </span>
+            </summary>
+
+            <div class="mapping-card-content">
+                <div class="import-meta-grid">
+                    <div>
+                        <span>File</span>
+                        <strong id="bank-transactions-preview-filename">—</strong>
+                    </div>
+
+                    <div>
+                        <span>Rows</span>
+                        <strong id="bank-transactions-preview-rows">—</strong>
+                    </div>
+
+                    <div>
+                        <span>Columns</span>
+                        <strong id="bank-transactions-preview-columns">—</strong>
+                    </div>
+
+                    <div>
+                        <span>Delimiter</span>
+                        <strong id="bank-transactions-preview-delimiter">—</strong>
+                    </div>
+
+                    <div>
+                        <span>Encoding</span>
+                        <strong id="bank-transactions-preview-encoding">—</strong>
+                    </div>
+                </div>
+
+                <div
+                    id="bank-transactions-preview-warnings"
+                    class="import-warning-list"
+                    hidden
+                ></div>
+
+                <div
+                    id="bank-transactions-mapping-status"
+                    class="mapping-readiness"
+                >
+                    Select a bank-transactions CSV to generate suggestions.
+                </div>
+
+                <div class="mapping-table-wrapper">
+                    <table class="mapping-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">
+                                    LedgerLens field
+                                </th>
+
+                                <th scope="col">
+                                    Requirement
+                                </th>
+
+                                <th scope="col">
+                                    Source CSV column
+                                </th>
+
+                                <th scope="col">
+                                    Confidence
+                                </th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="bank-transactions-mapping-body">
+                            <tr>
+                                <td
+                                    colspan="4"
+                                    class="empty-table-message"
+                                >
+                                    No bank-transactions preview available.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3 class="preview-table-heading">
+                    Data preview
+                </h3>
+
+                <div class="preview-table-wrapper">
+                    <table class="data-preview-table">
+                        <thead id="bank-transactions-preview-head"></thead>
+
+                        <tbody id="bank-transactions-preview-body">
+                            <tr>
+                                <td class="empty-table-message">
+                                    No preview rows available.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </details>
+    </div>
+</section>
         <section
             id="results-panel"
             class="results-panel"
@@ -757,6 +1116,7 @@
         </span>
     </footer>
 
-<script src="./app.js?v=5"></script>
+<script src="./app.js?v=6"></script>
 </body>
 </html>
+<script src="./app.js?v=8"></script>

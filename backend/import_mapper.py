@@ -94,13 +94,15 @@ FIELD_ALIASES: dict[str, dict[str, list[str]]] = {
             "debtor name",
             "company name",
         ],
-        "invoice_date": [
-            "date",
-            "document date",
-            "billing date",
-            "issue date",
-            "issued date",
-        ],
+ "invoice_date": [
+    "date",
+    "document date",
+    "billing date",
+    "issue date",
+    "issued date",
+    "posting date",
+    "posted date",
+],
         "due_date": [
             "payment due date",
             "due",
