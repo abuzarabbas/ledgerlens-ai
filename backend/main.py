@@ -23,6 +23,9 @@ from backend.matcher import (
     match_exact_references,
     match_with_fallbacks,
 )
+from backend.import_preview import (
+    router as import_preview_router,
+)
 from backend.validators import CSVValidationError, validate_csv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,6 +40,7 @@ app = FastAPI(
     ),
     version="0.8.0",
 )
+app.include_router(import_preview_router)
 
 app.mount(
     "/dashboard",
