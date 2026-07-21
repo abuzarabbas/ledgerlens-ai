@@ -11,18 +11,16 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DATA_DIRECTORY = PROJECT_ROOT / "data" / "synthetic"
 
 
-def test_root_endpoint() -> None:
-    """The API root should return basic service information."""
+def test_root_redirects_to_dashboard() -> None:
+    """The public root should redirect visitors to the dashboard."""
 
-    response = client.get("/")
+    response = client.get(
+        "/",
+        follow_redirects=False,
+    )
 
-    assert response.status_code == 200
-
-    response_data = response.json()
-
-    assert response_data["service"] == "LedgerLens AI API"
-    assert response_data["status"] == "running"
-    assert response_data["documentation"] == "/docs"
+    assert response.status_code == 307
+    assert response.headers["location"] == "/dashboard/"
 
 
 def test_health_endpoint() -> None:
