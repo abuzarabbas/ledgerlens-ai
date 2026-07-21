@@ -4,6 +4,7 @@ from typing import Any
 
 import pandas as pd
 from fastapi import FastAPI, File, HTTPException, UploadFile, status
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.concurrency import run_in_threadpool
 
@@ -19,17 +20,21 @@ from backend.groq_analyzer import (
     GroqAnalysisError,
     GroqAnalyzer,
 )
-from backend.matcher import (
-    match_exact_references,
-    match_with_fallbacks,
+from backend.import_normalize import (
+    router as import_normalize_router,
 )
 from backend.import_preview import (
     router as import_preview_router,
 )
-from backend.import_normalize import (
-    router as import_normalize_router,
+from backend.matcher import (
+    match_exact_references,
+    match_with_fallbacks,
 )
-from backend.validators import CSVValidationError, validate_csv
+from backend.validators import (
+    CSVValidationError,
+    validate_csv,
+)
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 FRONTEND_DIR = BASE_DIR / "frontend"
@@ -43,8 +48,11 @@ app = FastAPI(
     ),
     version="0.8.0",
 )
+
+
 app.include_router(import_preview_router)
 app.include_router(import_normalize_router)
+
 
 app.mount(
     "/dashboard",
@@ -54,12 +62,38 @@ app.mount(
     ),
     name="dashboard",
 )
+
+
+@app.get("/", include_in_schema=False)
+async def root() -> RedirectResponse:
+    """
+    Redirect visitors from the public service URL to the LedgerLens dashboard.
+    """
+
+    return RedirectResponse(
+        url="/dashboard/",
+        status_code=307,
+    )
+
+
+@app.get("/health", tags=["System"])
+async def health_check() -> dict[str, str]:
+    """
+    Confirm that the LedgerLens backend service is available.
+    """
+
+    return {
+        "status": "healthy",
+        "service": "ledgerlens-ai-backend",
+    }
+
+
 async def _read_validated_csv(
     file: UploadFile,
     dataset_type: str,
 ) -> tuple[pd.DataFrame, dict[str, Any]]:
     """
-    Read, validate and convert an uploaded LedgerLens CSV file.
+    Read, validate, and convert an uploaded LedgerLens CSV file.
     """
 
     if not file.filename:
@@ -87,10 +121,29 @@ async def _read_validated_csv(
             detail=f"{dataset_type}: {error}",
         ) from error
 
-    dataframe = pd.read_csv(
-        BytesIO(content),
-        dtype=str,
-    )
+    try:
+        dataframe = pd.read_csv(
+            BytesIO(content),
+            dtype=str,
+        )
+    except UnicodeDecodeError as error:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=(
+                f"The {dataset_type} file could not be decoded. "
+                "Upload a valid UTF-8 CSV file."
+            ),
+        ) from error
+    except pd.errors.EmptyDataError as error:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=f"The {dataset_type} CSV contains no readable data.",
+        ) from error
+    except pd.errors.ParserError as error:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=f"The {dataset_type} CSV structure is invalid.",
+        ) from error
 
     return dataframe, {
         "filename": file.filename,
@@ -150,28 +203,6 @@ async def _read_expected_matches_csv(
         ) from error
 
     return dataframe
-
-
-@app.get("/", tags=["System"])
-async def root() -> dict[str, str]:
-    """Return basic information about the LedgerLens AI API."""
-
-    return {
-        "service": "LedgerLens AI API",
-        "version": "0.8.0",
-        "status": "running",
-        "documentation": "/docs",
-    }
-
-
-@app.get("/health", tags=["System"])
-async def health_check() -> dict[str, str]:
-    """Confirm that the backend service is available."""
-
-    return {
-        "status": "healthy",
-        "service": "ledgerlens-ai-backend",
-    }
 
 
 @app.post("/validate/{dataset_type}", tags=["Validation"])
@@ -407,7 +438,8 @@ async def evaluate_fallback_reconciliation(
         await payments_file.close()
         await bank_transactions_file.close()
         await expected_matches_file.close()
-@app.post("/analyze/mock", tags=["AI Review"])
+
+
 @app.post("/analyze/mock", tags=["AI Review"])
 async def analyze_with_mock_ai(
     invoices_file: UploadFile = File(
@@ -548,7 +580,7 @@ async def analyze_with_groq(
             analyzer = GroqAnalyzer()
         except ValueError as error:
             raise HTTPException(
-                status_code=503,
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail={
                     "error_code": "groq_not_configured",
                     "message": str(error),
@@ -563,7 +595,7 @@ async def analyze_with_groq(
             )
         except GroqAnalysisError as error:
             raise HTTPException(
-                status_code=502,
+                status_code=status.HTTP_502_BAD_GATEWAY,
                 detail={
                     "error_code": "groq_analysis_failed",
                     "message": str(error),
